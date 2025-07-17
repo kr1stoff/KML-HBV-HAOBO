@@ -49,7 +49,8 @@ mkdir -p $OUTDIR/variant
     --use-best-n-alleles 4 --theta 0.001 --haplotype-length 0 --min-alternate-fraction 0.01 \
     --min-base-quality 30 --min-coverage 20 --min-alternate-count 2 --min-mapping-quality 30 \
     --max-complex-gap 1 --trim-complex-tail \
-    -f $OUTDIR/variant/$SAMPLE_ID.masked.fa \
+    --targets /data/mengxf/GitHub/KML-HBV-HAOBO/assets/target.bed \
+    --fasta-reference $OUTDIR/variant/$SAMPLE_ID.masked.fa \
     $OUTDIR/align/$SAMPLE_ID.sorted.bam >$OUTDIR/variant/$SAMPLE_ID.vcf
 # variant table
 /home/mengxf/miniforge3/bin/python /data/mengxf/GitHub/KML-HBV-HAOBO/scripts/vcf2tab.py \
