@@ -6,14 +6,14 @@
 # fastqc
 mkdir -p $OUTDIR/fastqc
 source /home/mengxf/miniforge3/bin/activate basic
-fastqc --threads 32 \
+fastqc --threads 8 \
     --outdir $OUTDIR/fastqc \
     $FQ1 $FQ2
 conda deactivate
 
 # fastp
 mkdir -p $OUTDIR/fastp
-/home/mengxf/miniforge3/envs/basic2/bin/fastp --thread 32 \
+/home/mengxf/miniforge3/envs/basic2/bin/fastp --thread 8 \
     --qualified_quality_phred 15 --unqualified_percent_limit 40 --length_required 15 \
     --cut_right --cut_window_size 4 --cut_mean_quality 20 --correction \
     --in1 $FQ1 \
@@ -25,12 +25,13 @@ mkdir -p $OUTDIR/fastp
 
 # align
 mkdir -p $OUTDIR/align
-/home/mengxf/miniforge3/envs/basic/bin/bwa mem -t 32 -M -Y -R '@RG\tID:'$SAMPLE_ID'\tSM:'$SAMPLE_ID \
-    /data/mengxf/Database/genome/Hepatitis_B_virus/HaoBoRef/D00330.fa \
+/home/mengxf/miniforge3/envs/basic/bin/bwa mem -t 8 -M -Y -R '@RG\tID:'$SAMPLE_ID'\tSM:'$SAMPLE_ID \
+    1 \
     $OUTDIR/fastp/$SAMPLE_ID.clean.1.fastq \
     $OUTDIR/fastp/$SAMPLE_ID.clean.2.fastq |
-    /home/mengxf/miniforge3/envs/basic/bin/samtools view -@ 32 -hbS - |
-    /home/mengxf/miniforge3/envs/basic/bin/samtools sort -@ 32 -o $OUTDIR/align/$SAMPLE_ID.sorted.bam -
+    /home/mengxf/miniforge3/envs/basic/bin/samtools view -@ 8 -hbS - |
+    /home/mengxf/miniforge3/envs/basic/bin/samtools sort -@ 8 -o $OUTDIR/align/$SAMPLE_ID.sorted.bam -
+/home/mengxf/miniforge3/envs/basic/bin/samtools index $OUTDIR/align/$SAMPLE_ID.sorted.bam
 # depth
 /home/mengxf/miniforge3/envs/basic2/bin/bedtools genomecov -bga -ibam $OUTDIR/align/$SAMPLE_ID.sorted.bam |
     awk '$4<20' |
