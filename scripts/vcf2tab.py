@@ -17,16 +17,28 @@ with open(out_file, "w") as f:
         ref = row["REF"]
         alt = row["ALT"]
         info = row["INFO"]
-        # * 如果过 info 中没有 AO 字段，则跳过该行
+        # 如果过 info 中没有 AO 字段，则跳过该行
         if "AO" not in info:
             continue
         info_dict = dict(item.split("=") for item in info.split(";"))
         ao = info_dict["AO"]
         dp = info_dict["DP"]
-        # 计算频率, 看 AO 是否有 ",",即多个变异碱基. 保留 4 位小数
+        # 简并 SNP, 拆成多条
+        # todo 是不是有简并的 MNP
         if "," in ao:
             aos = [int(x) for x in ao.split(",")]
-            freqs = ",".join([f"{int(ao) / int(dp):.4f}" for ao in aos])
+            alts = alt.split(",")
+            for i in range(len(aos)):
+                f.write("\t".join((chrom, pos, ref, alts[i], str(
+                    aos[i]), dp, f"{aos[i] / int(dp):.4f}")) + "\n")
         else:
-            freqs = f"{int(ao) / int(dp):.4f}"
-        f.write("\t".join((chrom, pos, ref, alt, ao, dp, freqs)) + "\n")
+            freq = f"{int(ao) / int(dp):.4f}"
+            # MNP 拆成单个 SNP
+            if (len(ref) > 1) and (len(ref) == len(alt)):
+                for i in range(len(ref)):
+                    if ref[i] != alt[i]:
+                        f.write("\t".join((chrom, str(int(pos) + i),
+                                ref[i], alt[i], ao, dp, freq)) + "\n")
+            # 正常情况
+            else:
+                f.write("\t".join((chrom, pos, ref, alt, ao, dp, freq)) + "\n")
