@@ -19,8 +19,17 @@ def main(samplesheet, fqdir, outdir):
     # 脚本目录
     scriptsdir = outdir / '.scripts'
     scriptsdir.mkdir(parents=True, exist_ok=True)
+    # 从 samplesheet 获取样本列表
+    flag = 0
+    matrix = []
+    with open(samplesheet, 'r') as f:
+        for line in f:
+            if line.startswith('Sample_ID'):
+                flag = 1
+            if flag:
+                matrix.append(line.strip().split(','))
+    samples = pd.DataFrame(matrix[1:], columns=matrix[0])['Sample_ID'].tolist()
     # 样本 shell
-    samples = pd.read_csv(samplesheet, skiprows=17, usecols=['Sample_ID'])['Sample_ID'].tolist()
     f0 = open(scriptsdir / 'all.sh', 'w')
     for samp in samples:
         fq1 = list(fqdir.glob(f'{samp}_*_R1_*.fastq.gz'))[0]

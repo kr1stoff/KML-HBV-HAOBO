@@ -20,15 +20,15 @@ mkdir -p $OUTDIR/fastp
     --in2 $FQ2 \
     --json $OUTDIR/fastp/$SAMPLE_ID.json \
     --html $OUTDIR/fastp/$SAMPLE_ID.html \
-    --out1 $OUTDIR/fastp/$SAMPLE_ID.clean.1.fastq \
-    --out2 $OUTDIR/fastp/$SAMPLE_ID.clean.2.fastq
+    --out1 $OUTDIR/fastp/$SAMPLE_ID.clean.1.fastq.gz \
+    --out2 $OUTDIR/fastp/$SAMPLE_ID.clean.2.fastq.gz
 
 # align
 mkdir -p $OUTDIR/align
 /home/mengxf/miniforge3/envs/basic/bin/bwa mem -t 8 -M -Y -R '@RG\tID:'$SAMPLE_ID'\tSM:'$SAMPLE_ID \
-    1 \
-    $OUTDIR/fastp/$SAMPLE_ID.clean.1.fastq \
-    $OUTDIR/fastp/$SAMPLE_ID.clean.2.fastq |
+    /data/mengxf/Database/genome/Hepatitis_B_virus/HaoBoRef/D00330.fa \
+    $OUTDIR/fastp/$SAMPLE_ID.clean.1.fastq.gz \
+    $OUTDIR/fastp/$SAMPLE_ID.clean.2.fastq.gz |
     /home/mengxf/miniforge3/envs/basic/bin/samtools view -@ 8 -hbS - |
     /home/mengxf/miniforge3/envs/basic/bin/samtools sort -@ 8 -o $OUTDIR/align/$SAMPLE_ID.sorted.bam -
 /home/mengxf/miniforge3/envs/basic/bin/samtools index $OUTDIR/align/$SAMPLE_ID.sorted.bam
