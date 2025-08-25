@@ -23,14 +23,21 @@ with open(out_file, "w") as f:
         info_dict = dict(item.split("=") for item in info.split(";"))
         ao = info_dict["AO"]
         dp = info_dict["DP"]
-        # 简并 SNP, 拆成多条
-        # todo 是不是有简并的 MNP
+        # 多 ALT 拆成多条
+        # todo 是不是有多 ALT 的 MNP
         if "," in ao:
             aos = [int(x) for x in ao.split(",")]
             alts = alt.split(",")
             for i in range(len(aos)):
-                f.write("\t".join((chrom, pos, ref, alts[i], str(
-                    aos[i]), dp, f"{aos[i] / int(dp):.4f}")) + "\n")
+                curalt = alts[i]
+                if (len(ref) > 1) and (len(ref) == len(curalt)):
+                    for i in range(len(ref)):
+                        if ref[i] != curalt[i]:
+                            f.write("\t".join((chrom, str(int(pos) + i), ref[i], curalt[i],
+                                               str(aos[i]), dp, f"{aos[i] / int(dp):.4f}")) + "\n")
+                else:
+                    f.write("\t".join((chrom, pos, ref, alts[i], str(
+                        aos[i]), dp, f"{aos[i] / int(dp):.4f}")) + "\n")
         else:
             freq = f"{int(ao) / int(dp):.4f}"
             # MNP 拆成单个 SNP
